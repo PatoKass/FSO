@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import Course from './Course'
 
 const App = () => {
