@@ -1,0 +1,15 @@
+.message--error {
+  color: white;
+  font-size: 16px;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: red;
+}
+
+.message--success {
+  color: white;
+  font-size: 16px;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: green;
+}
