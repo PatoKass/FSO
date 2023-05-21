@@ -8,7 +8,9 @@ const Persons = ({ persons, handleDelete }) => {
           <strong>
             {person.name}: {person.number}
           </strong>
-          <button onClick={() => handleDelete(person)}>Delete</button>
+          <button onClick={() => handleDelete(person, person.id)}>
+            Delete
+          </button>
         </div>
       ))}
     </div>

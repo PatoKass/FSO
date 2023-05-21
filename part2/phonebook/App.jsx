@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import Filter from './Filter'
-import PersonForm from './PersonForm'
-import Persons from './Persons'
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 import PersonServices from './services/persons'
-import Notification from './Notification'
+import Notification from './components/Notification'
 import axios from 'axios'
 
 const App = () => {
@@ -26,10 +26,10 @@ const App = () => {
       )
     : persons
 
-  const handleDelete = (person) => {
-    window.confirm(`Delete ${person.name}?`)
+  const handleDelete = (person, id) => {
+    const confirmation = window.confirm(`Delete ${person.name}?`)
 
-    const deletePerson = (id) => {
+    if (confirmation) {
       axios
         .delete(`http://localhost:3001/persons/${id}`)
         .then(() => {
@@ -37,20 +37,21 @@ const App = () => {
             text: `Deleted ${person.name}`,
             type: 'success',
           })
+          const updatedPersons = persons.filter((p) => p.id !== person.id)
+          setPersons(updatedPersons)
         })
-        .catch((error) => {
+        .catch(() => {
           setNewMessage({
             text: `Information of ${person.name} has already been deleted`,
             type: 'error',
           })
+        })
+        .finally(() => {
           setTimeout(() => {
             setNewMessage(null)
           }, 5000)
         })
     }
-    deletePerson(person.id)
-    const updatedPersons = persons.filter((p) => p.id !== person.id)
-    setPersons(updatedPersons)
   }
 
   const handleNameChange = (evt) => {
@@ -83,19 +84,49 @@ const App = () => {
     const alreadyPerson = persons.find((person) => person.name === newName) // if the name already exists in book, this variable takes a truthy value
 
     if (alreadyPerson) {
-      window.confirm(
+      const confirmation = window.confirm(
         `${alreadyPerson.name} is already added to phonebook, replace old number?`
       )
-      const updatedPersons = persons.map((person) =>
-        person.id === alreadyPerson.id // replace the number of the person with coincidental id
-          ? { ...person, number: newNumber }
-          : person
-      )
-      setPersons(updatedPersons)
+
+      if (confirmation) {
+        // first step is to communicate to backend
+        PersonServices.update(alreadyPerson.id, {
+          ...alreadyPerson,
+          number: newNumber,
+        })
+          //after that, to modify state
+          .then(() => {
+            const updatedPersons = persons.map((person) =>
+              person.id === alreadyPerson.id
+                ? { ...person, number: newNumber }
+                : person
+            )
+            setPersons(updatedPersons)
+            setNewMessage({ text: 'Modified successfully!', type: 'success' })
+          })
+          .catch((error) => {
+            setNewMessage({
+              text: `Failed to update ${alreadyPerson.name}: ${error.response.data.error}`,
+              type: 'error',
+            })
+          })
+          .finally(() => {
+            setTimeout(() => {
+              setNewMessage(null)
+            }, 5000)
+          })
+      }
     } else {
-      const newPersons = [...persons, newPerson]
-      setPersons(newPersons)
       PersonServices.create(newPerson)
+        .then((createdPerson) => {
+          setPersons([...persons, createdPerson.data])
+          setNewMessage({ text: 'Added successfully!', type: 'success' })
+        })
+        .finally(() => {
+          setTimeout(() => {
+            setNewMessage(null)
+          }, 5000)
+        })
     }
 
     setNewMessage({ text: 'Added succesfully!', type: 'success' })

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import CountryData from './components/CountryData'
+import CountryList from './components/CountryList'
 
 const apiKey = import.meta.env.VITE_API_KEY
 const baseUrl = 'https://restcountries.com/v3.1/all'
@@ -9,14 +11,9 @@ const getAll = (url) => {
 }
 
 const App = () => {
-  const [filter, setFilter] = useState('')
+  const [filtered, setFiltered] = useState('')
   const [countryData, setCountryData] = useState([])
-  const [weatherCity, setWeatherCity] = useState(null)
   const [weatherData, setWeatherData] = useState(null)
-
-  const matches = countryData.filter((country) =>
-    country.name.toLowerCase().includes(filter.toLowerCase())
-  )
 
   useEffect(() => {
     getAll(baseUrl).then((response) => {
@@ -42,83 +39,63 @@ const App = () => {
   }, [])
 
   useEffect(() => {
-    if (matches.length === 1) {
-      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${weatherCity}&appid=${apiKey}`
-      weatherCity &&
-        getAll(apiUrl).then((response) => {
-          const weatherData = response.data
+    if (filtered.length === 1) {
+      // only applies once there's a certain match (filtered.length === 1)
+      const capital = filtered[0].capital
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${capital}&appid=${apiKey}`
+      capital && // there are cases when countries lack a capital, so if they do, we don't request for weather info
+        getAll(apiUrl)
+          .then((response) => {
+            const weatherData = response.data
 
-          setWeatherData({
-            temperature: (weatherData.main.temp - 273, 15),
-            icon: `https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`,
-            wind: `${weatherData.wind.speed} m/s`,
+            setWeatherData({
+              temperature: Math.round(weatherData.main.temp - 273.15),
+              icon: `https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`,
+              wind: `${weatherData.wind.speed} m/s`,
+            })
           })
-        })
+          .catch((error) => {
+            console.log('Country has no capital city.')
+          })
     } else {
       setWeatherData(null)
     }
-    console.log(`capital is ${weatherCity}`)
-  }, [weatherCity])
+  }, [filtered])
 
   const handleCountry = (evt) => {
-    setFilter(filter)
+    // basically this function manages the "filtered" state
+    const filter = evt.target.value
 
-    console.log(`matches length ${matches.length}`)
-    if (matches.length === 1) {
-      setWeatherCity(matches[0].capital)
-    } else {
-      setWeatherCity(null)
-    }
+    const matches = countryData
+      ? countryData.filter((country) =>
+          country.name.toLowerCase().includes(filter.toLowerCase())
+        )
+      : ''
+    setFiltered(matches)
   }
 
   return (
     <div key="body">
       <h1>find countries</h1>
-      <input onChange={handleCountry} value={filter} />
-      {matches.length === countryData.length ? (
-        //      NOT matches length === 0 because initially the match variable matches everything
-        <div>Please enter a filter</div>
-      ) : matches.length < 11 ? (
-        matches.length === 1 ? (
-          // setWeatherCity(country.capital)
-          matches.map((country) => {
-            return (
-              <div key="country-info">
-                <h1 key={country.name}>{country.name} </h1>
-                <div key={country.capital}>capital {country.capital}</div>
-                <div key={country.area}>area {country.area} </div>
-                <h2>languages</h2>
-                <ul key="country-languages">
-                  {country.languages.map((lang) => (
-                    <li key={lang}>{lang} </li>
-                  ))}
-                </ul>
-                <h2>flag</h2>
-                <img src={country.flag} alt="country flag" />
-                {weatherData && (
-                  <div>
-                    <div>temperature: {weatherData.temperature}° celsius</div>
-                    <img src={weatherData.icon} alt="weather icon" />
-                    <div>wind: {weatherData.wind} </div>
-                  </div>
-                )}
-              </div>
-            )
-          })
+      <input autoFocus onChange={handleCountry} />
+      {filtered.length === 0 ? (
+        filtered === '' ? (
+          <h3>Please enter a filter.</h3>
         ) : (
-          matches.map((country) => {
-            return (
-              <ul key={country.name}>
-                <li>{country.name}</li>
-                <button value={country.name} onClick={handleCountry}>
-                  show
-                </button>
-              </ul>
-            )
-          })
+          <h3>No countries found, please enter a valid filter</h3>
+        )
+      ) : filtered.length < 11 ? (
+        filtered.length === 1 ? ( // if there's a certain match, show data
+          <CountryData filtered={filtered} weatherData={weatherData} />
+        ) : (
+          // if there's a list of max 10 candidates, show the list
+          <CountryList filtered={filtered} handleCountry={handleCountry} />
         )
       ) : (
-        <div>Too many matches, specify another filter</div>
+        <h3>
+          Too much countries fit your request, please give a more specific
+          filter.
+        </h3>
       )}
     </div>
   )
