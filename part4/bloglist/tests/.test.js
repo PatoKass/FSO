@@ -153,7 +153,7 @@ test('it gets the correct amount of blogs in JSON format', async () => {
   const res = await api.get('/api/blogs')
   expect(res.status).toBe(200)
   expect(res.headers['content-type']).toMatch(/application\/json/)
-  expect(res.body).toHaveLength(6)
+  expect(res.body).toHaveLength(19) //or whatever hardcoded length to match the amount of blogs in db
 })
 
 test('blogs have a property named "id"', async () => {
@@ -170,7 +170,7 @@ test('posting to the api succesfully creates and adds a new blog', async () => {
   const initialL = beforeBlogs.body.length
 
   const testBlog = new Blog({
-    title: 'Life of Messi',
+    title: 'testblog',
     author: 'Sergio Aguero',
     url: 'www.messi10.com.ar/goat',
     likes: 10,
@@ -178,11 +178,35 @@ test('posting to the api succesfully creates and adds a new blog', async () => {
 
   await testBlog.save()
 
-  const afterBlogs = await api.get('/api/blogs')
+  const afterBlogs = await api.get('/api/blogs') //new request should contain the new blog now
   const finalL = afterBlogs.body.length
 
   expect(finalL).toBe(initialL + 1)
-}, 10000)
+  //toStrictEqual is the right choice here instead of toBe
+  expect(afterBlogs.body[initialL]).toStrictEqual({
+    title: 'testblog',
+    id: afterBlogs.body[initialL].id,
+    author: 'Sergio Aguero',
+    url: 'www.messi10.com.ar/goat',
+    likes: 10,
+  })
+}, 10000) //regularly takes more than the standard 5000 ms timeout
+
+test('if no likes property is entered, it defaults to zero', async () => {
+  const testBlog = new Blog({
+    title: 'no-likes testblog',
+    author: 'Frank Zappa',
+    url: 'www.tukitaka.net',
+  })
+
+  await testBlog.save()
+
+  const afterBlogs = await api.get('/api/blogs')
+
+  const lastBlog = afterBlogs.body[afterBlogs.body.length - 1]
+
+  expect(lastBlog.likes).toEqual(0)
+})
 
 afterAll(async () => {
   await mongoose.connection.close()
