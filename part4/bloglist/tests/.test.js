@@ -3,6 +3,7 @@ const { totalLikes, dummy, favoriteBlog } = require('../utils/list_helper')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const api = supertest(app)
 
 describe('total likes', () => {
@@ -156,56 +157,155 @@ test('it gets the correct amount of blogs in JSON format', async () => {
   expect(res.body).toHaveLength(19) //or whatever hardcoded length to match the amount of blogs in db
 })
 
-test('blogs have a property named "id"', async () => {
-  const res = await api.get('/api/blogs')
+describe('when posting a new blog', () => {
+  test('blogs have a property named "id"', async () => {
+    const res = await api.get('/api/blogs')
 
-  res.body.forEach((blog) => {
-    expect(blog._id).toBeUndefined()
-    expect(blog.id).toBeDefined()
+    res.body.forEach((blog) => {
+      expect(blog._id).toBeUndefined()
+      expect(blog.id).toBeDefined()
+    })
+  })
+
+  test('posting to the api succesfully creates and adds a new blog', async () => {
+    const beforeBlogs = await api.get('/api/blogs')
+    const initialL = beforeBlogs.body.length
+
+    const testBlog = new Blog({
+      title: 'testblog',
+      author: 'Sergio Aguero',
+      url: 'www.messi10.com.ar/goat',
+      likes: 10,
+    })
+
+    await testBlog.save()
+
+    const afterBlogs = await api.get('/api/blogs') //new request should contain the new blog now
+    const finalL = afterBlogs.body.length
+
+    expect(finalL).toBe(initialL + 1)
+    //toStrictEqual is the right choice here instead of toBe
+    expect(afterBlogs.body[initialL]).toStrictEqual({
+      title: 'testblog',
+      id: afterBlogs.body[initialL].id,
+      author: 'Sergio Aguero',
+      url: 'www.messi10.com.ar/goat',
+      likes: 10,
+    })
+  }, 10000) //regularly takes more than the standard 5000 ms timeout
+
+  test('if no likes property is entered, it defaults to zero', async () => {
+    const testBlog = new Blog({
+      title: 'no-likes testblog',
+      author: 'Frank Zappa',
+      url: 'www.tukitaka.net',
+    })
+
+    await testBlog.save()
+
+    const afterBlogs = await api.get('/api/blogs')
+
+    const lastBlog = afterBlogs.body[afterBlogs.body.length - 1]
+
+    expect(lastBlog.likes).toEqual(0)
+  })
+  test('if no url or title properties are present, returns status 400', async () => {
+    const testBlog = new Blog({
+      author: 'Age of Empires II Definitive Edition',
+    })
+
+    const res = await api.post('/api/blogs').send(testBlog)
+
+    expect(res.status).toBe(400)
   })
 })
+test('deletes a single blog', async () => {
+  const blogs = await api.get('/api/blogs')
+  const testBlog = blogs.body[0] // it could be a random one but whatever
 
-test('posting to the api succesfully creates and adds a new blog', async () => {
+  const res = await api.delete(`/api/blogs/${testBlog.id}`)
+
+  expect(res.status).toBe(204)
+})
+test('updates the number of likes on put request', async () => {
   const beforeBlogs = await api.get('/api/blogs')
-  const initialL = beforeBlogs.body.length
+  const preLikes = beforeBlogs.body[0].likes
+  const id = beforeBlogs.body[0].id
 
-  const testBlog = new Blog({
-    title: 'testblog',
-    author: 'Sergio Aguero',
-    url: 'www.messi10.com.ar/goat',
-    likes: 10,
+  const res = await api.put(`/api/blogs/${id}`).send({ likes: preLikes + 1 })
+
+  expect(res.body.likes).toBe(preLikes + 1)
+})
+
+describe('creating invalid users does not work', () => {
+  test('creating duplicate users is not valid', async () => {
+    const newUser = new User({
+      username: 'DupliTest',
+      name: 'Lionel Messi',
+      password: 'messi10',
+    })
+    const sameUser = new User({
+      username: 'DupliTest',
+      name: 'Lionel Messi',
+      password: 'messi10',
+    })
+
+    await newUser.save()
+
+    try {
+      await sameUser.save()
+    } catch (error) {
+      expect(error.code).toBe(11000)
+      expect(error.message).toContain('duplicate key error')
+    }
   })
 
-  await testBlog.save()
+  test('password must have at least a length of 3', async () => {
+    const badPassUser = {
+      username: 'Lio2',
+      name: 'LionelMessi',
+      password: '10',
+    }
+    const res = await api.post('/api/users').send(badPassUser)
 
-  const afterBlogs = await api.get('/api/blogs') //new request should contain the new blog now
-  const finalL = afterBlogs.body.length
-
-  expect(finalL).toBe(initialL + 1)
-  //toStrictEqual is the right choice here instead of toBe
-  expect(afterBlogs.body[initialL]).toStrictEqual({
-    title: 'testblog',
-    id: afterBlogs.body[initialL].id,
-    author: 'Sergio Aguero',
-    url: 'www.messi10.com.ar/goat',
-    likes: 10,
-  })
-}, 10000) //regularly takes more than the standard 5000 ms timeout
-
-test('if no likes property is entered, it defaults to zero', async () => {
-  const testBlog = new Blog({
-    title: 'no-likes testblog',
-    author: 'Frank Zappa',
-    url: 'www.tukitaka.net',
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe(
+      'Password must be at least three characters long'
+    )
   })
 
-  await testBlog.save()
+  test('posting new user works fine', async () => {
+    const newUser = new User({
+      username: 'test',
+      name: 'Lionel Messi',
+      password: 'messi10',
+    })
+    const savedUser = await newUser.save()
 
-  const afterBlogs = await api.get('/api/blogs')
+    expect(savedUser).toBeDefined()
+    expect(savedUser.username).toBe('test')
+    expect(savedUser.name).toBe('Lionel Messi')
+  })
 
-  const lastBlog = afterBlogs.body[afterBlogs.body.length - 1]
+  test('username and name are required', async () => {
+    const noNameUser = new User({
+      username: 'Lio',
+      password: 'messi10',
+    })
+    const noUsernameUser = new User({
+      name: 'Lio',
+      password: 'messi10',
+    })
 
-  expect(lastBlog.likes).toEqual(0)
+    const noNamePost = await api.post('/api/users').send(noNameUser)
+    const noUsernamePost = await api.post('/api/users').send(noUsernameUser)
+
+    expect(noNamePost.status).toBe(400)
+    expect(noUsernamePost.status).toBe(400)
+    expect(noUsernamePost.body.error && noNamePost.body.error).toBe(
+      'Name or username are missing'
+    )
+  })
 })
 
 afterAll(async () => {
