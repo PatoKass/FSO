@@ -19,27 +19,28 @@ const BlogForm = ({ blogs, setBlogs, setNewMessage }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    try {
-      blogService.create(newBlog)
+    if (!newBlog.title || !newBlog.author || !newBlog.url) {
       setNewMessage({
-        text: `blog '${newBlog.title}' by ${newBlog.author} has been added `,
-        type: 'success',
-      })
-      setTimeout(() => {
-        setNewMessage(null)
-      }, 5000)
-      setBlogs([...blogs, newBlog])
-      console.log(blogs)
-      setNewBlog(EMPTY_BLOG)
-    } catch (e) {
-      setNewMessage({
-        text: 'Please give a title, author and URL.',
+        text: 'Please provide a title, author, and URL.',
         type: 'error',
       })
       setTimeout(() => {
         setNewMessage(null)
       }, 5000)
+      return
     }
+
+    blogService.create(newBlog)
+    setNewMessage({
+      text: `blog '${newBlog.title}' by ${newBlog.author} has been added `,
+      type: 'success',
+    })
+    setTimeout(() => {
+      setNewMessage(null)
+    }, 5000)
+    setBlogs([...blogs, newBlog])
+    console.log(blogs)
+    setNewBlog(EMPTY_BLOG)
   }
 
   return (

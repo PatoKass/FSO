@@ -26,5 +26,14 @@ const getAll = () => {
   return req.then((res) => res.data)
 }
 
+const remove = async (id) => {
+  const config = {
+    headers: { Authorization: token },
+  }
+
+  const res = await axios.delete(`${baseUrl}/${id}`, config)
+  return res.data
+}
+
 // eslint-disable-next-line import/no-anonymous-default-export
-export default { getAll, create, update, setToken }
+export default { getAll, create, update, setToken, remove }
