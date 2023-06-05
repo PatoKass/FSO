@@ -1,0 +1,9 @@
+post http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlBhdG8iLCJpZCI6IjY0NzY1YWY5MjUxZTMxNzg0YzE5ZTMwYyIsImlhdCI6MTY4NTQ3ODE1OX0.MiGh3gg57TExYxde6d2-9yvGuUf5QYo8IOs4Q0MmL7k
+
+{
+    "title": "peronismo",
+    "author": "HOLUUUU",
+    "url": "no se buscala vos"
+}
