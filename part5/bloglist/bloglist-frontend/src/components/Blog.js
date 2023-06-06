@@ -12,6 +12,8 @@ const Blog = ({ blog, sortedBlogs, setBlogs }) => {
   const loggedUserJSON = localStorage.getItem('loggedUser')
   const loggedUser = JSON.parse(loggedUserJSON)
   const loggedName = loggedUser.name
+  // if the app didn't assign the blog a user.name (because it's a newly added blog), then it's because it was posted by currently logged in user
+  const uploader = blog.user.name ? blog.user.name : loggedName
 
   const handleLike = () => {
     const updatedBlog = {
@@ -21,6 +23,8 @@ const Blog = ({ blog, sortedBlogs, setBlogs }) => {
 
     setLikes(likes + 1)
     blogServices.update(blog.id, updatedBlog)
+    console.log(loggedUser)
+    console.log(blog.user.name)
   }
 
   const handleDelete = () => {
@@ -49,8 +53,8 @@ const Blog = ({ blog, sortedBlogs, setBlogs }) => {
           <p>likes: {likes} </p>
           <button onClick={() => handleLike()}>like </button>
         </div>
-        {blog.user && blog.user.name ? <p>{blog.user.name} </p> : loggedName}
-        {blog.user && blog.user.name === loggedName && (
+        {blog.user && <p>{uploader}</p>}
+        {uploader === loggedName && (
           <button onClick={handleDelete}>remove</button>
         )}
       </div>

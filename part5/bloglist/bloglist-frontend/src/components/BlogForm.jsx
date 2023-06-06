@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import blogService from '../services/blogs'
+import propTypes from 'prop-types'
 
 const EMPTY_BLOG = { title: '', author: '', url: '' }
 
@@ -16,7 +17,7 @@ const BlogForm = ({ blogs, setBlogs, setNewMessage }) => {
     setNewBlog({ ...newBlog, url: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!newBlog.title || !newBlog.author || !newBlog.url) {
@@ -30,7 +31,7 @@ const BlogForm = ({ blogs, setBlogs, setNewMessage }) => {
       return
     }
 
-    blogService.create(newBlog)
+    const createdBlog = await blogService.create(newBlog)
     setNewMessage({
       text: `blog '${newBlog.title}' by ${newBlog.author} has been added `,
       type: 'success',
@@ -38,8 +39,8 @@ const BlogForm = ({ blogs, setBlogs, setNewMessage }) => {
     setTimeout(() => {
       setNewMessage(null)
     }, 5000)
-    setBlogs([...blogs, newBlog])
-    console.log(blogs)
+
+    setBlogs([...blogs, createdBlog])
     setNewBlog(EMPTY_BLOG)
   }
 
@@ -79,6 +80,12 @@ const BlogForm = ({ blogs, setBlogs, setNewMessage }) => {
       </form>
     </div>
   )
+}
+
+BlogForm.propTypes = {
+  blogs: propTypes.array.isRequired,
+  setBlogs: propTypes.func.isRequired,
+  setNewMessage: propTypes.func.isRequired,
 }
 
 export default BlogForm
