@@ -7,12 +7,15 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import BlogList from './components/BlogList'
 
+const EMPTY_BLOG = { title: '', author: '', url: '' }
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [newMessage, setNewMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const [newBlog, setNewBlog] = useState(EMPTY_BLOG)
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -48,13 +51,39 @@ const App = () => {
       }, 5000)
     }
   }
-  const handleLogout = async (e) => {
+  const handleLogout = async () => {
     window.localStorage.removeItem('loggedUser')
     setNewMessage({ text: 'logged out', type: 'success' })
     setTimeout(() => {
       setNewMessage(null)
     }, 5000)
     setUser(null)
+  }
+
+  const createBlog = async (e) => {
+    e.preventDefault()
+
+    if (!newBlog.title || !newBlog.author || !newBlog.url) {
+      setNewMessage({
+        text: 'Please provide a title, author, and URL.',
+        type: 'error',
+      })
+      setTimeout(() => {
+        setNewMessage(null)
+      }, 5000)
+      return
+    }
+    const createdBlog = await blogService.create(newBlog)
+    setNewMessage({
+      text: `Blog '${newBlog.title}' by ${newBlog.author} has been added `,
+      type: 'success',
+    })
+    setTimeout(() => {
+      setNewMessage(null)
+    }, 5000)
+
+    setBlogs([...blogs, createdBlog])
+    setNewBlog(EMPTY_BLOG)
   }
 
   return (
@@ -75,15 +104,15 @@ const App = () => {
           <div>
             <strong>{user.name} logged in</strong>
 
-            <button type="submit" onClick={handleLogout}>
+            <button id="logout-btn" type="submit" onClick={handleLogout}>
               Logout
             </button>
           </div>
-          <Togglable buttonLabel={'new note'}>
+          <Togglable buttonLabel={'new blog'}>
             <BlogForm
-              blogs={blogs}
-              setBlogs={setBlogs}
-              setNewMessage={setNewMessage}
+              createBlog={createBlog}
+              newBlog={newBlog}
+              setNewBlog={setNewBlog}
             />
           </Togglable>
 
