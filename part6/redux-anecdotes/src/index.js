@@ -18,4 +18,6 @@ const renderApp = () => {
 }
 
 renderApp()
-store.subscribe(renderApp)
+store.subscribe(renderApp, () => {
+  console.log(store)
+})
