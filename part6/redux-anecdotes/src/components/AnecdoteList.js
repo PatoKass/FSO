@@ -4,13 +4,21 @@ import { newVote } from '../reducers/anecdoteReducer'
 const AnecdoteList = () => {
   const dispatch = useDispatch()
 
-  const anecdotes = useSelector((state) => state)
+  const anecdotes = useSelector((state) => state.anecdotes)
+  const filter = useSelector((state) => state.filter)
 
   const vote = (id) => {
     dispatch(newVote(id))
+    console.log(`anecdote length is ${anecdotes.length}`)
   }
 
-  const sortedAnecdotes = [...anecdotes].sort((a, b) => b.votes - a.votes)
+  let filteredAnecdotes = anecdotes.filter((anecdote) =>
+    anecdote.content.toLowerCase().includes(filter)
+  )
+
+  const sortedAnecdotes = [...filteredAnecdotes].sort(
+    (a, b) => b.votes - a.votes
+  )
 
   return (
     <div>
@@ -19,8 +27,13 @@ const AnecdoteList = () => {
         <div key={anecdote.id}>
           <div>{anecdote.content}</div>
           <div>
-            has {anecdote.votes}
-            <button onClick={() => vote(anecdote.id)}>vote</button>
+            has {anecdote.votes} votes
+            <button
+              style={{ marginLeft: '1rem' }}
+              onClick={() => vote(anecdote.id)}
+            >
+              vote
+            </button>
           </div>
         </div>
       ))}
