@@ -6,30 +6,27 @@ import App from './App'
 
 import filterReducer from './reducers/filterReducer'
 import anecdoteReducer from './reducers/anecdoteReducer'
+import notificationReducer from './reducers/notificationReducer'
 
 const store = configureStore({
-  reducer: { anecdotes: anecdoteReducer, filter: filterReducer },
+  reducer: {
+    anecdotes: anecdoteReducer,
+    filter: filterReducer,
+    notification: notificationReducer,
+  },
 })
 
-console.log(store.getState())
+const root = ReactDOM.createRoot(document.getElementById('root'))
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <Provider store={store}>
-    <App />
-  </Provider>
-)
+const renderApp = () => {
+  root.render(
+    <Provider store={store}>
+      <App />
+    </Provider>
+  )
+}
 
-// const root = ReactDOM.createRoot(document.getElementById('root'))
-
-// const renderApp = () => {
-//   root.render(
-//     <Provider store={store}>
-//       <App />
-//     </Provider>
-//   )
-// }
-
-// renderApp()
-// store.subscribe(renderApp, () => {
-//   console.log(store)
-// })
+renderApp()
+store.subscribe(renderApp, () => {
+  console.log(store)
+})
