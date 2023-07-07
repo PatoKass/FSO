@@ -1,0 +1,21 @@
+.BlogForm {
+  display: flex;
+  padding: 0;
+  height: 150px;
+  flex-direction: column;
+  color: rgb(140, 31, 208);
+  border: 1px;
+  margin-bottom: 100px;
+}
+
+label {
+  margin: 8px;
+}
+
+input {
+  margin: 16px;
+}
+
+.submit-btn {
+  width: 60px;
+}
