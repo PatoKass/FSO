@@ -5,6 +5,7 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import BlogList from './components/BlogList'
 import Blog from './components/Blog'
+import Nav from './components/Nav'
 import User from './components/User'
 import Userlist from './components/Userlist'
 import { useDispatch, useSelector } from 'react-redux'
@@ -16,7 +17,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link,
   Navigate,
 } from 'react-router-dom'
 
@@ -46,7 +46,7 @@ const App = () => {
   const Home = () => {
     return (
       <div>
-        <div>
+        <div className=" justify-center">
           <Togglable buttonLabel={'new blog'}>
             <BlogForm />
           </Togglable>
@@ -56,65 +56,46 @@ const App = () => {
     )
   }
 
-  const padding = {
-    padding: 5,
-  }
-
   return (
-    <div>
-      <Router>
-        <div>
-          {user && (
-            <div>
-              <Link style={padding} to="/">
-                blogs
-              </Link>
-              <Link style={padding} to="/users">
-                users
-              </Link>
+    <div className="bg-yellow-500 absolute inset-0">
+      <div className="mx-5">
+        <Router>
+          <div>
+            {user && (
+              <div>
+                <Nav username={user.name} handleLogout={handleLogout} />
+              </div>
+            )}
+          </div>
+          <h1 className="text-5xl my-5 font-bold underline flex justify-center">
+            Bloglist
+          </h1>
+          {notification && <Notification />}
 
-              <strong>{user.name} logged in</strong>
-
-              <button
-                style={{
-                  marginLeft: 5,
-                }}
-                id="logout-btn"
-                type="submit"
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
-            </div>
-          )}
-        </div>
-
-        <h1>Blogs</h1>
-        {notification && <Notification />}
-
-        <Routes>
-          <Route
-            path="/login"
-            element={!user ? <Login /> : <Navigate replace to="/" />}
-          />
-          <Route
-            path="/users/:id"
-            element={user ? <User /> : <Navigate replace to="/login" />}
-          />
-          <Route
-            path="/users"
-            element={user ? <Userlist /> : <Navigate replace to="/login" />}
-          />
-          <Route
-            path="/"
-            element={user ? <Home /> : <Navigate replace to="/login" />}
-          />
-          <Route
-            path="/blogs/:id"
-            element={user ? <Blog /> : <Navigate replace to="/login" />}
-          />
-        </Routes>
-      </Router>
+          <Routes>
+            <Route
+              path="/login"
+              element={!user ? <Login /> : <Navigate replace to="/" />}
+            />
+            <Route
+              path="/users/:id"
+              element={user ? <User /> : <Navigate replace to="/login" />}
+            />
+            <Route
+              path="/users"
+              element={user ? <Userlist /> : <Navigate replace to="/login" />}
+            />
+            <Route
+              path="/"
+              element={user ? <Home /> : <Navigate replace to="/login" />}
+            />
+            <Route
+              path="/blogs/:id"
+              element={user ? <Blog /> : <Navigate replace to="/login" />}
+            />
+          </Routes>
+        </Router>
+      </div>
     </div>
   )
 }

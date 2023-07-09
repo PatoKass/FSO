@@ -11,10 +11,14 @@ const blogSlice = createSlice({
     setBlogs(state, action) {
       return action.payload
     },
+    modifyBlog(state, action) {
+      const blogs = state.filter((blog) => blog.id !== action.payload.id)
+      return [...blogs, action.payload]
+    },
   },
 })
 
-export const { appendBlog, setBlogs } = blogSlice.actions
+export const { appendBlog, setBlogs, modifyBlog } = blogSlice.actions
 
 export const initializeBlogs = () => {
   return async (dispatch) => {
@@ -44,14 +48,19 @@ export const addLike = (id) => {
     let updatedBlog = await blogService.update(id, likedBlog)
 
     //this fixes a bug because the server responds only with the user id instead of all user data, so this line prevents the user field to change
-    updatedBlog = { ...updatedBlog, user: blog.user }
+    //same with comments!
+
+    updatedBlog = {
+      ...updatedBlog,
+      user: blog.user,
+      comments: likedBlog.comments,
+    }
 
     const updatedBlogs = state.map((blog) =>
       blog.id !== id ? blog : updatedBlog
     )
 
     dispatch(setBlogs(updatedBlogs))
-    console.log(state.blogs)
   }
 }
 export const deleteBlog = (id) => {
@@ -67,42 +76,17 @@ export const deleteBlog = (id) => {
 export const commentBlog = (id, comment) => {
   return async (dispatch, getState) => {
     const blogs = getState().blogs
-    const blogIndex = blogs.findIndex((blog) => blog.id === id)
+    const blog = blogs.find((blog) => blog.id === id)
 
-    const blog = blogs[blogIndex]
-    const comments = [...blog.comments, comment]
+    const newComment = await blogService.postComment(id, comment)
 
     const updatedBlog = {
       ...blog,
-      comments,
+      comments: [...blog.comments, newComment],
     }
 
-    const updatedBlogs = [...blogs]
-    updatedBlogs[blogIndex] = updatedBlog
-
-    await blogService.update(id, updatedBlog)
-
-    dispatch(setBlogs(updatedBlogs))
+    dispatch(modifyBlog(updatedBlog))
   }
 }
-
-// export const commentBlog = (id, comment) => {
-//   return async (dispatch, getState) => {
-//     const state = getState().blogs
-//     const blog = state.filter((blog) => blog.id === id)[0]
-//     const comments = [...blog.comments, comment]
-
-//     const commentedBlog = {
-//       ...blog,
-//       comments,
-//     }
-
-//     console.log(`commented blog is ${JSON.stringify(commentedBlog)}`)
-//     const updatedBlogs = await blogService.update(id, commentedBlog)
-//     console.log(`updated blogs is ${JSON.stringify(updatedBlogs)}`)
-
-//     dispatch(setBlogs(updatedBlogs))
-//   }
-// }
 
 export default blogSlice.reducer

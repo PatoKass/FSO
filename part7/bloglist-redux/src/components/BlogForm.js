@@ -46,12 +46,17 @@ const BlogForm = () => {
   }
 
   return (
-    <div>
-      <form action="submit" onSubmit={handleSubmit} className="BlogForm">
+    <div className="my-3">
+      <form
+        action="submit"
+        onSubmit={handleSubmit}
+        className=" p-12 flex justify-between flex-col items-center"
+      >
         <label htmlFor="title">
           title
           <input
             autoFocus
+            className="mx-2"
             id="title"
             type="text"
             name="Title"
@@ -59,9 +64,10 @@ const BlogForm = () => {
             onChange={handleTitle}
           />
         </label>
-        <label htmlFor="title">
+        <label className="my-4" htmlFor="title">
           author
           <input
+            className="mx-2"
             id="author"
             type="text"
             name="Author"
@@ -72,6 +78,7 @@ const BlogForm = () => {
         <label htmlFor="url">
           url
           <input
+            className="mx-2"
             id="url"
             type="text"
             name="Url"
@@ -79,7 +86,10 @@ const BlogForm = () => {
             onChange={handleUrl}
           />
         </label>
-        <button type="submit" className="submit-btn">
+        <button
+          type="submit"
+          className="p-2 my-4 text-white rounded-md bg-indigo-600"
+        >
           create
         </button>
       </form>

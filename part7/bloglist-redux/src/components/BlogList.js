@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux/es/hooks/useSelector'
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
 const BlogList = () => {
@@ -9,20 +9,15 @@ const BlogList = () => {
   }
   let sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes) //sorted according to likes, from most to least
 
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5,
-  }
-
   return (
-    <div id="blog-list">
-      <h3>Blog List</h3>
+    <div className="flex justify-center flex-col" id="blog-list">
+      <h2 className="p-3 my-8 text-3xl">Blog List</h2>
       {sortedBlogs.map((blog) => (
-        <div style={blogStyle} key={blog.id}>
-          <Link to={`/blogs/${blog.id}`}>
+        <div className="p-4" key={blog.id}>
+          <Link
+            className="p-3  border-2 border-red-900 bg-red-500"
+            to={`/blogs/${blog.id}`}
+          >
             {blog.title} {blog.author}
           </Link>
         </div>

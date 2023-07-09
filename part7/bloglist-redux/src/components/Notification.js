@@ -19,9 +19,17 @@ const Notification = () => {
   }
 
   if (notification.type === 'error') {
-    return <div style={errorStyle}>{notification.text}</div>
+    return (
+      <div className="my-4" style={errorStyle}>
+        {notification.text}
+      </div>
+    )
   } else {
-    return <div style={successStyle}>{notification.text}</div>
+    return (
+      <div className="my-4" style={successStyle}>
+        {notification.text}
+      </div>
+    )
   }
 }
 

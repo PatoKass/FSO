@@ -1,4 +1,8 @@
-.BlogForm {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* .BlogForm {
   display: flex;
   padding: 0;
   height: 150px;
@@ -18,4 +22,4 @@ input {
 
 .submit-btn {
   width: 60px;
-}
+} */

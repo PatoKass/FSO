@@ -1,21 +1,25 @@
 const jwt = require('jsonwebtoken')
+const mongoose = require('mongoose')
 const blogsRouter = require('express').Router()
 require('express-async-errors')
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const Comment = require('../models/comment')
 
 blogsRouter.get('/', async (req, res) => {
-  const blogs = await Blog.find({}).populate('user', {
-    name: 1,
-    username: 1,
-    id: 1,
-  })
+  const blogs = await Blog.find({})
+    .populate('user', {
+      name: 1,
+      username: 1,
+      id: 1,
+    })
+    .populate('comments', { comment: 1, id: 1 })
   res.json(blogs)
 })
 
 blogsRouter.post('/', async (req, res) => {
   const body = req.body
-  console.log(req.user)
+
   const decodedToken = jwt.verify(req.token, process.env.SECRET)
   if (!decodedToken.id) {
     return res.status(401).json({ error: 'token invalid' })
@@ -26,16 +30,12 @@ blogsRouter.post('/', async (req, res) => {
     res.status(400).json('Please give a title and url for your blog')
   }
 
-  // const users = await User.find({})
-  // const user = users[0]
-
   const blog = new Blog({
     title: body.title,
     author: body.author,
     url: body.url,
     likes: body.likes ? body.likes : 0,
     user,
-    comments: [],
   })
 
   const savedBlog = await blog.save()
@@ -46,6 +46,7 @@ blogsRouter.post('/', async (req, res) => {
 
 blogsRouter.get('/:id', async (req, res) => {
   const blog = await Blog.findById(req.params.id)
+
   res.json(blog)
 })
 
@@ -63,16 +64,29 @@ blogsRouter.delete('/:id', async (req, res) => {
 
 blogsRouter.put('/:id', async (req, res) => {
   const newLikes = req.body.likes
-  const newComments = req.body.comments
 
   const updatedBlog = await Blog.findByIdAndUpdate(
     req.params.id,
-    { likes: newLikes, comments: newComments },
+    { likes: newLikes },
     { new: true, runValidators: true, context: 'query' }
   )
 
-  console.log(updatedBlog)
   res.json(updatedBlog)
+})
+
+blogsRouter.post('/:id/comments', async (req, res) => {
+  const { comment } = req.body
+  const blog = await Blog.findById(req.params.id)
+
+  const newComment = new Comment({
+    comment,
+    _id: new mongoose.Types.ObjectId(),
+  })
+
+  const savedComment = await newComment.save()
+  blog.comments = blog.comments.concat(savedComment._id)
+  await blog.save()
+  res.status(201).json(savedComment)
 })
 
 module.exports = blogsRouter
