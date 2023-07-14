@@ -4,7 +4,6 @@ import { setNotification } from '../reducers/notificationReducer'
 import { useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-// import { initializeComments } from '../reducers/commentReducer'
 
 const Blog = () => {
   const [newComment, setNewComment] = useState('')
@@ -45,42 +44,39 @@ const Blog = () => {
   }
 
   return (
-    <div className="flex items-center flex-col">
-      <div>
-        <h1 className="text-3xl">
-          {blog.title} {blog.author}
-        </h1>
-        <a
-          className="text-2xl"
-          href={
-            // the conditional is needed because if 'http' is not present, it will redirect to `blogs/${blog.url}`
-            blog.url.startsWith('http') ? blog.url : `http://${blog.url}`
-          }
+    <div className="my-16 items-center rounded-2xl border-red-950 border-2 flex flex-col">
+      <h1 className="my-8 text-3xl">
+        {blog.title} {blog.author}
+      </h1>
+      <a
+        className="flex justify-center text-2xl text-cyan-600 underline"
+        href={
+          // the conditional is needed because if 'http' is not present, it will redirect to `blogs/${blog.url}`
+          blog.url.startsWith('http') ? blog.url : `http://${blog.url}`
+        }
+      >
+        {blog.url}
+      </a>
+
+      <p className="flex my-3 justify-center">likes: {blog.likes} </p>
+      <button
+        onClick={handleLike}
+        className="flex my-3 justify-center p-2 text-white rounded-md bg-indigo-600"
+      >
+        like
+      </button>
+
+      <p>added by {blog.user.name} </p>
+      {uploader === loggedName && (
+        <button
+          className=" flex my-3 justify-center p-2 text-white rounded-md bg-indigo-600"
+          onClick={handleDelete}
         >
-          {blog.url}
-        </a>
-        <div className="flex p-3">
-          <p>likes: {blog.likes} </p>
-          <button
-            onClick={handleLike}
-            className="p-2 mx-3 text-white rounded-md bg-indigo-600"
-          >
-            like
-          </button>
-        </div>
-      </div>
-      <div className="flex">
-        <p>added by {blog.user.name} </p>
-        {uploader === loggedName && (
-          <button
-            className="p-2 mx-12 text-white rounded-md bg-indigo-600"
-            onClick={handleDelete}
-          >
-            remove
-          </button>
-        )}
-      </div>
-      <div>
+          remove
+        </button>
+      )}
+
+      <div className="p-10 my-6 items-center rounded-2xl border-red-950 border-2">
         <h2 className="p-3 text-3xl">Comments:</h2>
         <input
           type="text"
@@ -94,7 +90,7 @@ const Blog = () => {
         >
           add comment
         </button>
-        <ul>
+        <ul className="list-disc">
           {blog.comments.map((comment) => (
             <li key={comment.id}>{comment.comment}</li>
           ))}

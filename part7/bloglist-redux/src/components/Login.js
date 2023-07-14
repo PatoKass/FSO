@@ -32,12 +32,15 @@ const Login = () => {
   }
 
   return (
-    <div>
-      <h2>Log in to application</h2>
-      <form onSubmit={handleLogin} id="login-form">
-        <div>
+    <div className="flex justify-center items-center">
+      <form className="flex flex-col" onSubmit={handleLogin} id="login-form">
+        <h2 className="flex self-center my-5 text-xl ">
+          Log in to application
+        </h2>
+        <div className="m-3">
           username
           <input
+            className="mx-3"
             autoFocus
             type="text"
             id="username"
@@ -47,9 +50,10 @@ const Login = () => {
             onChange={({ target }) => setUsername(target.value)}
           />
         </div>
-        <div>
+        <div className="m-3">
           password
           <input
+            className="mx-3"
             type="password"
             id="password"
             value={password}
@@ -58,7 +62,11 @@ const Login = () => {
             onChange={({ target }) => setPassword(target.value)}
           />
         </div>
-        <button id="login-button" type="submit">
+        <button
+          className="p-2 my-4 text-white rounded-md bg-indigo-600"
+          id="login-button"
+          type="submit"
+        >
           Login
         </button>
       </form>

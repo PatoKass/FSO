@@ -11,7 +11,7 @@ const Togglable = ({ buttonLabel, children }) => {
   }
 
   return (
-    <div className="">
+    <div className=" flex justify-center align-center">
       <div style={hideWhenVisible}>
         <button
           id="new-blog"

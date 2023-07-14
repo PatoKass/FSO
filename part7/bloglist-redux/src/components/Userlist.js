@@ -5,7 +5,7 @@ const Users = () => {
   const users = useSelector((state) => state.userlist)
 
   return (
-    <table>
+    <table className="flex w-auto my-8 relative justify-center flex-col items-center rounded-2xl border-red-950 border-2">
       <tbody>
         <tr>
           <td> </td>
@@ -16,7 +16,9 @@ const Users = () => {
         {users.map((user) => (
           <tr key={user.username}>
             <td>
-              <Link to={`/users/${user.id}`}>{user.username}</Link>
+              <Link to={`/users/${user.id}`} className="text-blue-500">
+                {user.username}
+              </Link>
             </td>
             <td>{user.blogs.length} </td>
           </tr>

@@ -46,7 +46,7 @@ const App = () => {
   const Home = () => {
     return (
       <div>
-        <div className=" justify-center">
+        <div>
           <Togglable buttonLabel={'new blog'}>
             <BlogForm />
           </Togglable>
@@ -57,7 +57,7 @@ const App = () => {
   }
 
   return (
-    <div className="bg-yellow-500 absolute inset-0">
+    <div className="">
       <div className="mx-5">
         <Router>
           <div>
@@ -83,7 +83,13 @@ const App = () => {
             />
             <Route
               path="/users"
-              element={user ? <Userlist /> : <Navigate replace to="/login" />}
+              element={
+                user ? (
+                  <Userlist className="flex w-auto my-8 relative justify-center flex-col items-center rounded-2xl border-red-950 border-2" />
+                ) : (
+                  <Navigate replace to="/login" />
+                )
+              }
             />
             <Route
               path="/"

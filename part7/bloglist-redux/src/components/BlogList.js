@@ -10,10 +10,10 @@ const BlogList = () => {
   let sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes) //sorted according to likes, from most to least
 
   return (
-    <div className="flex justify-center flex-col" id="blog-list">
-      <h2 className="p-3 my-8 text-3xl">Blog List</h2>
+    <div className="flex w-auto my-8 relative justify-center flex-col items-center rounded-2xl border-red-950 border-2">
+      <h2 className="p-3 my-8 text-3xl">Blogs:</h2>
       {sortedBlogs.map((blog) => (
-        <div className="p-4" key={blog.id}>
+        <div className="p-4 my-3" key={blog.id}>
           <Link
             className="p-3  border-2 border-red-900 bg-red-500"
             to={`/blogs/${blog.id}`}

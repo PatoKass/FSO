@@ -46,7 +46,7 @@ const BlogForm = () => {
   }
 
   return (
-    <div className="my-3">
+    <div className="my-3 items-center rounded-2xl border-red-950 border-2">
       <form
         action="submit"
         onSubmit={handleSubmit}
